@@ -1,0 +1,86 @@
+security:
+  realm: jenkins_database
+  adminPassword: admin
+
+  remove_master_envvars:
+  - '.*PASSWORD.*'
+
+credentials:
+  kubernetestoken:
+    type: text
+    text: eyJhbGciOiJSUzI1NiIsImtpZCI6IkQ2YTNiMEtYX3h0bjhYdmp0dUhISmRHUXN2WThaYU5WdzNMNDFqWW8zeWcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJtYXhwYXluZSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJtYXhwYXluZS1zZWNyZXQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoibWF4cGF5bmUiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI0NjVjODNjOS1kYmQ1LTRlNzMtOThjNi03YWExMmU2ZTdmMTYiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6bWF4cGF5bmU6bWF4cGF5bmUifQ.zlX6aaxfX_efEkhH2-ScfAG5ixUyuLP9IlM_ew_qaPpco9gjhnKZQPkQ630VoGgoEFKgT7oMc914y_cDBweiGM3kV_fJKR0Dx6O6qDfJ5hLVgDW3Hu71pkY6AAkgNtcsxu0FEInucONfLxruiPOijDBvhqpp5Ahytg545lYp9naA-RMYl5Ly3UXsYwrzYMUG2P0eVJGvEAXeWr1ziF-guiUFxJycWy0qOv-YXRtBVp_xPAIJM6dEgxSAnd86qO7mHL8PfGll9Xoos9HCjAfazo2KIvhyU_xwdCFH8Wc39coXbrAwyypSod1UmNLJTcigVMDR8niA1v96QHnqnMcFtQ
+
+clouds:
+  kube-cloud:
+    ## Max connections to Kubernetes API (Default 32)
+    maxRequestsPerHost: 32
+    ## default is false
+    directConnection: false
+    ## Use WebSocket to connect agents rather than the TCP port. Default is false
+    webSocket: false
+    # type is mandatory
+    type: kubernetes
+    # Kubernetes URL
+    serverUrl: https://10.10.10.11:6443
+    skipTlsVerify: true
+    # Default kubernetes namespace for slaves
+    namespace: maxpayne
+    # Pod templates
+    credentialsId: kubernetestoken 
+    templates:
+      - name: kubeslave
+        image: jenkins/inbound-agent:4.11-1-jdk11
+        labels:
+          - kubeslave
+        resourceRequestMemory: 512Mi
+        resourceRequestCpu: 500m
+        resourceLimitCpu: 2000m
+        resourceLimitMemory: 4096Mi
+        yaml: |-
+          apiVersion: v1
+          kind: Pod
+          spec:
+            volumes:
+            - name: docker-socket
+              emptyDir: {}
+            - name: docker-credentials
+              secret:
+                secretName: dockercreds
+            containers:
+            - name: builder
+              image: docker:20.10.19
+              tty: true
+              stdin: true
+              command:
+              - sleep
+              args:
+              - 99d
+              volumeMounts:
+              - name: docker-socket
+                mountPath: /var/run
+              - name: docker-credentials
+                mountPath: /root/.docker
+            - name: docker-daemon
+              image: docker:dind
+              securityContext:
+                privileged: true
+              volumeMounts:
+              - name: docker-socket
+                mountPath: /var/run
+job_dsl_scripts:
+- |
+    multibranchPipelineJob('meetup_job') {
+        branchSources {
+          git {
+            id('meetup_job')
+            remote('https://github.com/itechartpoland/meetup.git')
+            includes('maxpayne')
+          }
+        }
+        factory {
+            workflowBranchProjectFactory {
+              scriptPath('Jenkinsfile')
+            }
+        }
+    }
+

@@ -1,0 +1,4 @@
+alpine.qcow2
+terraform.tfstate
+.terraform/
+.terraform.lock.hcl

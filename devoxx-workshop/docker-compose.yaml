@@ -1,0 +1,19 @@
+version: '2'
+services:
+  jenkins-master:
+    image: odavid/my-bloody-jenkins
+    ports:
+      - '8090:8080'
+      - '50000:50000'
+    volumes:
+      - './config.yaml:/config.yaml'
+      - '.data/jenkins_home:/var/jenkins_home'
+    environment:
+      JAVA_OPTS_MEM: '-Xmx1g'
+      # Disable hyper provision of slaves - docker plugin strategy is enough
+      JAVA_OPTS_LOAD_STATS_CLOCK: ''
+      JENKINS_ENV_ADMIN_USER: admin
+      JENKINS_ENV_HOST_IP: 10.10.10.173
+      JENKINS_HTTP_PORT_FOR_SLAVES: "8090"
+      JENKINS_ENV_CONFIG_YML_URL: file:///config.yaml
+      JENKINS_ENV_QUIET_STARTUP_PERIOD: 20

@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: maxpayne
+  namespace: maxpayne
+automountServiceAccountToken: true
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: maxpayne-secret
+  namespace: maxpayne
+  annotations:
+    kubernetes.io/service-account.name: maxpayne
+type: kubernetes.io/service-account-token
+
+--- 
+kind: Role 
+apiVersion: rbac.authorization.k8s.io/v1
+metadata: 
+  name: maxpayne-full-access 
+  namespace: maxpayne 
+rules: 
+- apiGroups: ["", "extensions", "apps"] 
+  resources: ["*"] 
+  verbs: ["*"] 
+--- 
+kind: RoleBinding 
+apiVersion: rbac.authorization.k8s.io/v1
+metadata: 
+  name: maxpayne-view 
+  namespace: maxpayne 
+subjects: 
+- kind: ServiceAccount 
+  name: maxpayne 
+  namespace: maxpayne 
+roleRef: 
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role 
+  name: maxpayne-full-access

@@ -1,0 +1,17 @@
+job_dsl_scripts:
+- |
+    multibranchPipelineJob('meetup_job') {
+        branchSources {
+          git {
+            id('meetup_job')
+            remote('https://github.com/itechartpoland/meetup.git')
+            includes('maxpayne')
+          }
+        }
+        factory {
+            workflowBranchProjectFactory {
+              scriptPath('Jenkinsfile')
+            }
+        }
+    }
+
