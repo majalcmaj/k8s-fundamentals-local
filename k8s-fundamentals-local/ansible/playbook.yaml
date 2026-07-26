@@ -1,3 +1,4 @@
+# Following https://wiki.alpinelinux.org/wiki/K8s
 - name: K8s setup
   hosts: myhosts
   vars:
@@ -10,6 +11,33 @@
       ansible.builtin.template:
         src: templates/etc_apk_repositories.j2
         dest: /etc/apk/repositories
-        owner: root
-        group: root
 
+    - name: Boot-time br_netfilter module
+      ansible.builtin.lineinfile:
+        path: /etc/modules-load.d/k8s.conf
+        line: br_netfilter
+        create: yes
+
+    - name: Load br_netfilter module
+      community.general.modprobe:
+        name: br_netfilter
+        state: present
+
+    - name: Enable ip forwarding
+      ansible.posix.sysctl:
+        name: net.ipv4_ip_forward
+        value: '1'
+        state: present
+        reload: true
+
+    - name: Enable bridge iptables
+      ansible.posix.sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: '1'
+        state: present
+        reload: true
+
+    - name: Install packages
+      community.general.apk:
+        name: cni-plugin-flannel,cni-plugins,flannel,flannel-contrib-cni,kubelet,kubeadm,kubectl,containerd,uuidgen
+        state: present
