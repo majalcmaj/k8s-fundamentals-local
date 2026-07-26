@@ -57,8 +57,8 @@ resource "libvirt_domain" "cp-node" {
           type = "virtio"
         }
         source = {
-          bridge = {
-            bridge = "br0"
+          network = {
+            network = "default"
           }
         }
       }
