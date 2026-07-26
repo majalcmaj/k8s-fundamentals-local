@@ -1,0 +1,15 @@
+- name: K8s setup
+  hosts: myhosts
+  vars:
+    alpine_version: "3.24"
+  tasks:
+    - name: Ping the hosts
+      ansible.builtin.ping:
+    
+    - name: Setup Repositories
+      ansible.builtin.template:
+        src: templates/etc_apk_repositories.j2
+        dest: /etc/apk/repositories
+        owner: root
+        group: root
+
