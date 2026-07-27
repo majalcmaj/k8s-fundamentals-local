@@ -54,6 +54,29 @@
       when: ansible_facts["swaptotal_mb"] > 0
       ansible.builtin.command: swapoff -a
 
+# TODO: Add "Fix prometheus errors section"
+
+    - name: Setup services
+      ansible.builtin.shell: |
+        set -euxo pipefail
+        uuidgen > /etc/machine-id
+        rc-update add containerd
+        rc-update add kubelet
+        rc-service containerd start
+        rc-update add ntpd
+        rc-service ntpd start
+        apk add 'kubelet=~1.36'
+        apk add 'kubeadm=~1.36'
+        apk add 'kubectl=~1.36'
+
+    - name: Setup flannel
+      ansible.builtin.shell: ln -s /usr/libexec/cni/flannel-amd64 /usr/libexec/cni/flannel
+      args:
+        creates: "/usr/libexec/cni/flannel"
+
+
+# TODO: Validate: Should bump containerd sandbox_image?
+
 #    - name: Print ansible facts
 #      ansible.builtin.debug:
 #        var: ansible_facts
