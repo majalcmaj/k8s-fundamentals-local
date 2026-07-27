@@ -41,3 +41,20 @@
       community.general.apk:
         name: cni-plugin-flannel,cni-plugins,flannel,flannel-contrib-cni,kubelet,kubeadm,kubectl,containerd,uuidgen
         state: present
+
+    - name: Remove swap fstab entry
+      ansible.builtin.lineinfile:
+        backup: true
+        backrefs: yes
+        regexp: '^[^#](.*swap.*)$'
+        line: '# \1'
+        path: /etc/fstab
+
+    - name: Swapoff
+      when: ansible_facts["swaptotal_mb"] > 0
+      ansible.builtin.command: swapoff -a
+
+#    - name: Print ansible facts
+#      ansible.builtin.debug:
+#        var: ansible_facts
+
