@@ -1,5 +1,4 @@
-alpine.qcow2
-terraform.tfstate
-terraform.tfstate.backup
+alpine.qcow2*
+terraform.tfstate*
 .terraform/
 .terraform.lock.hcl
