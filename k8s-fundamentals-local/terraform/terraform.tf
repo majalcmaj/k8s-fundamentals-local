@@ -61,6 +61,7 @@ resource "libvirt_domain" "cp-node" {
             network = "default"
           }
         }
+        wait_for_ip = {}
       }
     ]
     serials = [
@@ -81,4 +82,13 @@ resource "libvirt_domain" "cp-node" {
     ]
   }
   running = true
+}
+
+data "libvirt_domain_interface_addresses" "ip_addresses" {
+  domain = "cp-node"
+}
+
+output "instance_ip" {
+  description = "IP addresses of provisioned instances"
+  value       = data.libvirt_domain_interface_addresses.ip_addresses.interfaces
 }
