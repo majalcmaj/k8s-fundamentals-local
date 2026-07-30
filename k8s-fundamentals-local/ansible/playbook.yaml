@@ -55,6 +55,7 @@
       ansible.builtin.command: swapoff -a
 
 # TODO: Add "Fix prometheus errors section"
+# TODO: find a way to regenerate the machine-id only when necessary (maybe just validate against existing one?)
 
     - name: Setup services
       ansible.builtin.shell: |
